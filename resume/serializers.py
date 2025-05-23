@@ -1,0 +1,9 @@
+from resume.models import ResumeFeedback
+from rest_framework import serializers
+from django.db.models import Q
+
+
+class ResumeFeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResumeFeedback
+        fields = '__all__'
