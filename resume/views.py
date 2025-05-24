@@ -7,11 +7,10 @@ from resume.models import ResumeFeedback
 from resume.serializers import ResumeFeedbackSerializer
 from rest_framework.response import Response
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
-from langchain.llms import HuggingFacePipeline
+from langchain_huggingface import HuggingFacePipeline
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 import torch
-from huggingface_hub import login
 import warnings
 
 
@@ -31,12 +30,11 @@ def extract_text_from_docx(file):
     text = "\n".join([para.text for para in doc.paragraphs])
     return text
 
-HUGGINGFACE_TOKEN=settings.HUGGINGFACE_TOKEN
+# HUGGINGFACE_TOKEN=settings.HUGGINGFACE_TOKEN
 
-login(token=HUGGINGFACE_TOKEN)
 
-tokenizer = AutoTokenizer.from_pretrained("google/gemma-2b-it", token=HUGGINGFACE_TOKEN)
-model = AutoModelForCausalLM.from_pretrained("google/gemma-2b-it", token=HUGGINGFACE_TOKEN, torch_dtype=torch.float32)
+tokenizer = AutoTokenizer.from_pretrained("google/gemma-2b-it")
+model = AutoModelForCausalLM.from_pretrained("google/gemma-2b-it")
 
 generator = pipeline(
     "text-generation",
@@ -66,10 +64,11 @@ Resume:
 """
 )
 
-resume_chain = LLMChain(llm=llm, prompt=prompt)
+resume_chain = prompt | llm
+
 
 def generate_resume_feedback(text: str) -> str:
-    return resume_chain.run(resume=text)
+    return resume_chain.invoke({"resume": text})
 
 class ResumeViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = ResumeFeedback.objects.all()
@@ -92,7 +91,9 @@ class ResumeViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        feedback = generate_resume_feedback(resume_text)
+        ai_response = generate_resume_feedback(resume_text)
+        prompt_text = prompt.format(resume=resume_text).strip()
+        feedback = ai_response.replace(prompt_text, "").strip()
 
         instance = ResumeFeedback.objects.create(
             resume_file=resume_file,
