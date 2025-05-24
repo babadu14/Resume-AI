@@ -1,11 +1,22 @@
 from django.shortcuts import render
 from rest_framework import mixins, viewsets, status
-# Create your views here.
+from django.conf import settings
 import PyPDF2
 import docx
 from resume.models import ResumeFeedback
 from resume.serializers import ResumeFeedbackSerializer
 from rest_framework.response import Response
+from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
+from langchain.llms import HuggingFacePipeline
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+import torch
+from huggingface_hub import login
+import warnings
+
+
+
+
 
 def extract_text_from_pdf(file):
     text = ""
@@ -20,15 +31,21 @@ def extract_text_from_docx(file):
     text = "\n".join([para.text for para in doc.paragraphs])
     return text
 
-from transformers import pipeline
-from langchain.llms import HuggingFacePipeline
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+HUGGINGFACE_TOKEN=settings.HUGGINGFACE_TOKEN
+
+login(token=HUGGINGFACE_TOKEN)
+
+tokenizer = AutoTokenizer.from_pretrained("google/gemma-2b-it", token=HUGGINGFACE_TOKEN)
+model = AutoModelForCausalLM.from_pretrained("google/gemma-2b-it", token=HUGGINGFACE_TOKEN, torch_dtype=torch.float32)
 
 generator = pipeline(
     "text-generation",
-    model="gpt2",
-    max_new_tokens=200)
+    model=model,
+    device=-1,
+    tokenizer=tokenizer,
+    max_new_tokens=300,
+    temperature=0.7,
+    )
 
 llm = HuggingFacePipeline(pipeline=generator)
 
@@ -40,6 +57,7 @@ Evaluate the following resume using this rubric:
 - Clarity and grammar (out of 10)
 - Formatting (out of 10)
 - Soft skills demonstrated (out of 10)
+- Give job suggestions
 
 Give a total score, and then explain each sub-score briefly.
 
@@ -74,7 +92,7 @@ class ResumeViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        feedback = resume_chain.run(resume=resume_text)
+        feedback = generate_resume_feedback(resume_text)
 
         instance = ResumeFeedback.objects.create(
             resume_file=resume_file,
@@ -84,3 +102,6 @@ class ResumeViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         
         output = self.get_serializer(instance)
         return Response(output.data, status=status.HTTP_201_CREATED)
+    
+
+warnings.filterwarnings("ignore", category=UserWarning)
