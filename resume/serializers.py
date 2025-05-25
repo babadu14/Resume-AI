@@ -6,6 +6,6 @@ from django.db.models import Q
 class ResumeFeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResumeFeedback
-        fields = fields =  ['id', 'resume_file', 'feedback', 'created_at']
+        fields =  ['id', 'resume_file', 'feedback', 'created_at']
         read_only_fields = ['feedback', 'created_at']
 
