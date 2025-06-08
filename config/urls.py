@@ -46,6 +46,7 @@ urlpatterns = [
     path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('admin/', admin.site.urls),
     path('', include('resume.urls')),
+    path('', include('users.urls')),
     path("swagger/", schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='redoc-ui'),
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

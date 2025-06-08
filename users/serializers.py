@@ -34,6 +34,16 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         return user
     
+class PasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        try:
+            user = User.objects.get(email=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("მომხმარებელი ვერ მოიძებნა")
+        return value    
+    
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
