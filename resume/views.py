@@ -12,7 +12,8 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 import torch
 import warnings
-from rest_framework.permissions import IsAuthenticated
+
+
 
 
 
@@ -72,7 +73,6 @@ def generate_resume_feedback(text: str) -> str:
 class ResumeViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = ResumeFeedback.objects.all()
     serializer_class = ResumeFeedbackSerializer
-    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -98,7 +98,6 @@ class ResumeViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         instance = ResumeFeedback.objects.create(
             resume_file=resume_file,
             feedback=feedback,
-            user=request.user
         )
 
         
