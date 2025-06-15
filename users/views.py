@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from users.permissions import IsObjectOwnerOrReadOnly
 from rest_framework import mixins, viewsets
 from django.contrib.auth import get_user_model
 from users.serializers import RegisterSerializer, PasswordSerializer, PasswordResetConfirmSerializer, EmailCodeResendSerializer, EmailCodeConfirmSerializer
