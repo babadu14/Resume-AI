@@ -140,7 +140,7 @@ AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'users.authentication.JWTAuthenticationFromCookie',
         'rest_framework.authentication.SessionAuthentication',
     )
 }

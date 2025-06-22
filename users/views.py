@@ -18,6 +18,7 @@ from django.urls import reverse
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.contrib.auth.tokens import default_token_generator
+from rest_framework_simplejwt.views import TokenObtainPairView
 User = get_user_model()
 
 
@@ -139,4 +140,18 @@ class PasswordResetConfirmViewSet(mixins.CreateModelMixin, viewsets.GenericViewS
                 {"message":"Password succesfully updated"}, status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
+class CookieTokenObtainPairView(TokenObtainPairView):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 200:
+            access = response.data.get('access')
+            response.set_cookie(
+                key='jwt_token',
+                value=access,
+                httponly=True,
+                samesite='Lax',
+                secure=False,  
+            )
+        return response
