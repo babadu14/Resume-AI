@@ -13,6 +13,9 @@ from langchain.chains import LLMChain
 import torch
 import warnings
 from rest_framework.permissions import IsAuthenticated
+from django.core.mail import send_mail
+from rest_framework.parsers import MultiPartParser, FormParser
+import threading
 
 
 
@@ -68,13 +71,25 @@ Resume:
 resume_chain = prompt | llm
 
 
-def generate_resume_feedback(text: str) -> str:
+def generate_resume_feedback(text: str):
     return resume_chain.invoke({"resume": text})
 
-class ResumeViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+
+def grade_resume_and_notify(user_email, feedback_url):
+    send_mail(
+        subject="✅ Your Resume Has Been Graded!",
+        message=f"Hello!\n\nYour resume has been successfully graded. You can view the feedback here:\n\n{feedback_url}",
+        from_email="noreply@yourdomain.com",
+        recipient_list=[user_email],
+        fail_silently=False,
+    )
+
+class ResumeViewSet(mixins.RetrieveModelMixin,mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = ResumeFeedback.objects.all()
     serializer_class = ResumeFeedbackSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser] 
+
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -103,9 +118,17 @@ class ResumeViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             user = request.user
         )
 
-        
+        feedback_url = f"http://localhost:8000/resume/{instance.id}/"
+
+
+        threading.Thread(
+            target=grade_resume_and_notify,
+            args=(request.user.email, feedback_url)
+        ).start()
+
         output = self.get_serializer(instance)
         return Response(output.data, status=status.HTTP_201_CREATED)
     
+
 
 warnings.filterwarnings("ignore", category=UserWarning)

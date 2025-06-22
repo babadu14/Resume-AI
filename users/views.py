@@ -139,3 +139,4 @@ class PasswordResetConfirmViewSet(mixins.CreateModelMixin, viewsets.GenericViewS
                 {"message":"Password succesfully updated"}, status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
