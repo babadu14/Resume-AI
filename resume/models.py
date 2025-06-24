@@ -7,3 +7,11 @@ class ResumeFeedback(models.Model):
     feedback = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey("users.User", related_name='resumes', on_delete=models.CASCADE)
+
+class CorrectedResume(models.Model):
+    original_resume = models.FileField(upload_to='media/', validators=[validate_file_size]) 
+    corrected_resume_text = models.TextField(blank=True)
+    user = models.ForeignKey("users.User", related_name='correctedresumes', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+

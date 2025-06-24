@@ -4,6 +4,8 @@ import os
 import sys
 
 
+os.environ['CURL_CA_BUNDLE'] = ''
+
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')

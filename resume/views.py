@@ -3,8 +3,8 @@ from rest_framework import mixins, viewsets, status
 from django.conf import settings
 import PyPDF2
 import docx
-from resume.models import ResumeFeedback
-from resume.serializers import ResumeFeedbackSerializer
+from resume.models import ResumeFeedback, CorrectedResume
+from resume.serializers import ResumeFeedbackSerializer, CorrectedResumeSerializer
 from rest_framework.response import Response
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
 from langchain_huggingface import HuggingFacePipeline
@@ -36,7 +36,7 @@ def extract_text_from_docx(file):
 
 # HUGGINGFACE_TOKEN=settings.HUGGINGFACE_TOKEN
 
-
+                                                         #PROMPT FOR GRADING RESUME
 tokenizer = AutoTokenizer.from_pretrained("google/gemma-2b-it")
 model = AutoModelForCausalLM.from_pretrained("google/gemma-2b-it")
 
@@ -68,11 +68,35 @@ Resume:
 """
 )
 
+
+                                        #PROMPT FOR CORRECTING THE RESUME
+
+correction_prompt = PromptTemplate(
+    input_variables=["resume"],
+    template="""
+You are an expert resume editor.
+
+Please revise the following resume to improve:
+- Grammar and spelling
+- Sentence clarity
+- Professional tone and formatting
+
+Only return the improved resume text. Do not explain your changes. Do not summarize.
+
+Resume:
+{resume}
+"""
+)
+
 resume_chain = prompt | llm
+correct_resume_chain = correction_prompt | llm
 
 
 def generate_resume_feedback(text: str):
     return resume_chain.invoke({"resume": text})
+
+def generate_corrected_resume(text: str):
+    return correct_resume_chain.invoke({"resume": text})
 
 
 def grade_resume_and_notify(user_email, feedback_url):
@@ -129,6 +153,47 @@ class ResumeViewSet(mixins.RetrieveModelMixin,mixins.CreateModelMixin, viewsets.
         output = self.get_serializer(instance)
         return Response(output.data, status=status.HTTP_201_CREATED)
     
+
+
+
+
+
+    
+class CorrectedResumeViewset(mixins.RetrieveModelMixin,mixins.CreateModelMixin,viewsets.GenericViewSet):
+    queryset = CorrectedResume.objects.all()
+    serializer_class = CorrectedResumeSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def create(self,request,*args,**kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        original_resume = serializer.validated_data['original_resume']
+        file_name = original_resume.name.lower()
+        if file_name.endswith(".pdf"):
+            resume_text = extract_text_from_pdf(original_resume)
+        elif file_name.endswith(".docx"):
+            resume_text = extract_text_from_docx(original_resume)
+        else:
+            return Response(
+                {"error": "Unsupported file format. Please upload PDF or DOCX."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        ai_response = generate_corrected_resume(resume_text)
+
+        instance = CorrectedResume.objects.create(
+            user = request.user,
+            corrected_resume_text = ai_response,
+            original_resume=original_resume
+
+        )
+
+        output = self.get_serializer(instance)
+        return Response(output.data, status=status.HTTP_201_CREATED)
+
+
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
