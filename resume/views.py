@@ -114,6 +114,10 @@ class ResumeViewSet(mixins.RetrieveModelMixin,mixins.CreateModelMixin, viewsets.
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser] 
 
+    def get_queryset(self):
+        return ResumeFeedback.objects.filter(user=self.request.user)
+
+
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -165,6 +169,9 @@ class CorrectedResumeViewset(mixins.RetrieveModelMixin,mixins.CreateModelMixin,v
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
+    def get_queryset(self):
+        return CorrectedResume.objects.filter(user=self.request.user)
+
     def create(self,request,*args,**kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -189,6 +196,15 @@ class CorrectedResumeViewset(mixins.RetrieveModelMixin,mixins.CreateModelMixin,v
             original_resume=original_resume
 
         )
+
+
+        feedback_url = f"http://localhost:8000/corrected/{instance.id}/"
+
+        
+        threading.Thread(
+            target=grade_resume_and_notify,
+            args=(request.user.email, feedback_url)
+        ).start()
 
         output = self.get_serializer(instance)
         return Response(output.data, status=status.HTTP_201_CREATED)
