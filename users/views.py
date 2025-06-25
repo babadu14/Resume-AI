@@ -19,6 +19,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.views import APIView
 User = get_user_model()
 
 
@@ -154,4 +155,12 @@ class CookieTokenObtainPairView(TokenObtainPairView):
                 samesite='Lax',
                 secure=False,  
             )
+        return response
+    
+
+class LogoutView(APIView):
+    permission_classes=[IsAuthenticated]
+    def post(self, request):
+        response = Response({"message":"logged out succesfully"})
+        response.delete_cookie("jwt_token")
         return response
