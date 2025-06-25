@@ -49,3 +49,23 @@ python manage.py migrate
 
 # Start the server
 python manage.py runserver
+
+---
+
+⚠️ Usage Limitations
+This app is optimized for lightweight resumes (1–2 pages, simple formatting).
+
+Please avoid uploading heavy or overly designed resumes (e.g. CVs with lots of tables, graphics, or 5+ pages).
+
+Large files may lead to long processing times or incomplete AI corrections due to model token limitations.
+
+PDF files should contain real text (not just scanned images) — scanned resumes won't work.
+
+🧠 Why It Matters
+Models like Gemma 2B and others on Hugging Face have context length limits (usually 1024 tokens or less).
+
+Longer resumes get truncated or cause the model to fail or "echo" back the prompt.
+
+Heavy DOCX/PDF resumes with complex formatting may extract poorly, producing messy or unreadable AI results.
+
+
