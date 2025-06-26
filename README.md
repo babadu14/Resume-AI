@@ -34,7 +34,7 @@
 
 ```bash
 # Clone the repo
-git clone https://github.com/YOUR_USERNAME/Resume-AI.git
+git clone https://github.com/babadu14/Resume-AI.git
 cd Resume-AI
 
 # Set up a virtual environment
