@@ -87,7 +87,7 @@ class RegisterView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             user = serializer.validated_data['user']
             user.is_active = True
             user.save()
-            return Response({"message": 'მომხმარებელი წარმატებით არის გააქტიურებული'}, status=status.HTTP_200_OK)
+            return Response({"message": 'user was successfully activated'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -112,12 +112,12 @@ class PasswordResetRequestViewSet(mixins.CreateModelMixin, viewsets.GenericViewS
             )
 
             #send mail
-            subject = "პაროლის აღდგენა"
-            message = f"დააჭირე ბმულს რომ აღადგინო პაროლი {reset_url}"
+            subject = "password reset"
+            message = f"click the link to reset password {reset_url}"
             send_mail(subject, message, 'no-reply@example.com', [user.email])
 
             return Response(
-                {"message": "ბმული გაგზავნილია ელფოსტაზე"}, status=status.HTTP_200_OK
+                {"message": "link successfully sent to email"}, status=status.HTTP_200_OK
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
