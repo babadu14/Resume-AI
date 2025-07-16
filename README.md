@@ -50,11 +50,16 @@ python manage.py migrate
 #create a .env file in your code editor and write the following things:
 
                         #HOW TO GET PASSWORD
-#to get the password go to your email page, gmail is preferable
-#click on your profile picture in the top right corner and click manage your google account
-#once there in the search bar type "sign in with app passwords"
-#scroll down until you find "create and manage your app passwords" button (it should be highlited)
-#click on it. and enter your password
+to get the password go to your email page, gmail is preferable
+
+click on your profile picture in the top right corner and click manage your google account
+
+once there in the search bar type "sign in with app passwords"
+
+scroll down until you find "create and manage your app passwords" button (it should be highlited)
+
+click on it. and enter your password
+
 #after that type in the app name(whatever you want) and click on create, you will see a code. copy it and paste it in the .env file 
 
 EMAIL_HOST_USER = "your email"
