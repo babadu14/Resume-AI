@@ -39,7 +39,7 @@ cd Resume-AI
 
 # Set up a virtual environment
 python -m venv env
-source env/bin/activate  # On Windows: env\Scripts\activate
+env\Scripts\activate  # On Mac: source env/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -49,7 +49,10 @@ python manage.py migrate
 
 #create a .env file in your code editor and write the following things:
 
-                        #HOW TO GET PASSWORD
+EMAIL_HOST_USER = "your email"
+EMAIL_HOST_PASSWORD = "password"
+
+                        #HOW TO GET PASSWORD 
 to get the password go to your email page, gmail is preferable
 
 click on your profile picture in the top right corner and click manage your google account
@@ -62,8 +65,6 @@ click on it. and enter your password
 
 #after that type in the app name(whatever you want) and click on create, you will see a code. copy it and paste it in the .env file 
 
-EMAIL_HOST_USER = "your email"
-EMAIL_HOST_PASSWORD = "password"
 
 #ALL OF THIS IS NECESSARY, OTHERWISE CODE WONT BE SENT TO YOUR EMAIL AND YOU WONT BE ABLE TO LOG IN
 
