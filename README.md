@@ -66,6 +66,24 @@ EMAIL_HOST_PASSWORD = "password"
 # Start the server
 python manage.py runserver
 
+## 🔑 Hugging Face Token Setup
+
+This project uses Hugging Face models (e.g., **Google Gemma 2B IT**). To run the app locally, you need a Hugging Face account and an access token.
+
+### Steps:
+
+1. **Create a Hugging Face Account**
+   - Go to [https://huggingface.co/join](https://huggingface.co/join) and sign up.
+
+2. **Generate an Access Token**
+   - Visit [https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
+   - Click **New token**, give it a name, and select **Read** permission.
+   - Copy the token.
+
+3. **Log in from your terminal**
+   ```bash
+   huggingface-cli login
+
 
 ```
 ---
