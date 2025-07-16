@@ -47,7 +47,7 @@ pip install -r requirements.txt
 # Run migrations
 python manage.py migrate
 
-#create a .env file in your code editor and write the following things:
+#Create a .env file in your code editor and write the following things:
 
 EMAIL_HOST_USER = "your email"
 EMAIL_HOST_PASSWORD = "password"
